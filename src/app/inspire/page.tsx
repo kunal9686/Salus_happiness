@@ -40,7 +40,7 @@ export default function InspirePage() {
 
   return (
     <DashboardLayout pageTitle="Inspire">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-yellow-50 to-amber-100 min-h-full">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-gray-950 to-emerald-900 min-h-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {inspirationalContent.map((item, index) => {
             if (item.type === "quote") {

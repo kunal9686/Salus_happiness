@@ -49,7 +49,7 @@ const threads = [
 export default function CommunityPage() {
   return (
     <DashboardLayout pageTitle="Community Forum">
-      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-gradient-to-br from-teal-50 to-green-100 min-h-full">
+      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-gradient-to-br from-gray-950 to-teal-900 min-h-full">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold tracking-tight font-headline">Discussions</h2>
           <Button>Start New Thread</Button>

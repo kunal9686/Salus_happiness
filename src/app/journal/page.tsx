@@ -28,7 +28,7 @@ const journalEntries = [
 export default function JournalPage() {
   return (
     <DashboardLayout pageTitle="Journal">
-      <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 bg-gradient-to-br from-pink-50 to-rose-100 min-h-full">
+      <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 bg-gradient-to-br from-gray-950 to-green-900 min-h-full">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">New Entry</CardTitle>

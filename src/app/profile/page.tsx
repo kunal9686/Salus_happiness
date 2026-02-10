@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 export default function ProfilePage() {
   return (
     <DashboardLayout pageTitle="Profile">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-gray-950 via-teal-950 to-green-950">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
