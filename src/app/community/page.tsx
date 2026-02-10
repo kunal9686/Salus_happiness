@@ -56,7 +56,7 @@ export default function CommunityPage() {
         </div>
         <div className="space-y-4">
           {threads.map((thread, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+            <Card key={index} className="hover:shadow-lg transition-all duration-300 ease-in-out">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
