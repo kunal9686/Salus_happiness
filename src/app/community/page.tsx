@@ -77,7 +77,7 @@ export default function CommunityPage() {
 
   return (
     <DashboardLayout pageTitle="Community Forum">
-      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-pink-900 min-h-full max-w-5xl mx-auto">
+      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-pink-900 min-h-full">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold tracking-tight font-headline">Discussions</h2>
            <Dialog open={open} onOpenChange={setOpen}>

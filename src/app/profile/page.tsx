@@ -70,7 +70,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <DashboardLayout pageTitle="Profile">
-        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 max-w-5xl mx-auto">
+        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
@@ -111,7 +111,7 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout pageTitle="Profile">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-black via-purple-900 to-pink-900 max-w-5xl mx-auto">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-black via-purple-900 to-pink-900">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>

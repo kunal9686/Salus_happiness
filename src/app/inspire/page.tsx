@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,7 +41,7 @@ export default function InspirePage() {
 
   return (
     <DashboardLayout pageTitle="Inspire">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-yellow-700 min-h-full max-w-5xl mx-auto">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-yellow-700 min-h-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {inspirationalContent.map((item, index) => {
             if (item.type === "quote") {

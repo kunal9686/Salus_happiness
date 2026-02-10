@@ -52,7 +52,7 @@ export default function JournalPage() {
 
   return (
     <DashboardLayout pageTitle="Journal">
-      <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-indigo-900 min-h-full max-w-5xl mx-auto">
+      <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 bg-gradient-to-br from-black to-indigo-900 min-h-full">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">New Entry</CardTitle>
