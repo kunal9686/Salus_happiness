@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CornerDownLeft } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { useFirestore } from "@/firebase/provider";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, doc, serverTimestamp, query, orderBy, getDocs, getDoc } from "firebase/firestore";
+import { useMemoFirebase } from "@/firebase/provider";
 
 interface Message {
   id: string;
@@ -46,15 +47,11 @@ export default function ChatbotPage() {
     }
   }, [user, firestore, sessionId]);
 
-  const messagesRef = useMemo(() => {
+  const messagesQuery = useMemoFirebase(() => {
     if (!user || !firestore || !sessionId) return null;
-    return collection(firestore, "users", user.uid, "chatbotSessions", sessionId, "chatMessages");
-  }, [user, firestore, sessionId]);
-
-  const messagesQuery = useMemo(() => {
-    if (!messagesRef) return null;
+    const messagesRef = collection(firestore, "users", user.uid, "chatbotSessions", sessionId, "chatMessages");
     return query(messagesRef, orderBy("messageTime"));
-  }, [messagesRef]);
+  }, [user, firestore, sessionId]);
 
   const { data: messages, isLoading: isLoadingMessages } = useCollection<Omit<Message, 'id'>>(messagesQuery);
   
@@ -73,8 +70,10 @@ export default function ChatbotPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !messagesRef || !user || !firestore) return;
-
+    if (!input.trim() || isLoading || !user || !firestore || !sessionId) return;
+    
+    const messagesRef = collection(firestore, "users", user.uid, "chatbotSessions", sessionId, "chatMessages");
+    
     const userInput = input;
     setInput("");
     

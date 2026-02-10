@@ -13,9 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, ThumbsUp } from "lucide-react";
-import { useUser } from "@/firebase/provider";
+import { useUser, useFirestore, useMemoFirebase } from "@/firebase/provider";
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { useFirestore } from "@/firebase/provider";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, orderBy, query, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,7 +30,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CommunityPage() {
@@ -44,21 +43,17 @@ export default function CommunityPage() {
   const [newThreadContent, setNewThreadContent] = useState("");
   const [newThreadCategory, setNewThreadCategory] = useState("");
 
-  const postsRef = useMemo(() => {
+  const postsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, "communityPosts");
-  }, [firestore]);
-
-  const postsQuery = useMemo(() => {
-    if (!postsRef) return null;
+    const postsRef = collection(firestore, "communityPosts");
     return query(postsRef, orderBy("postDate", "desc"));
-  }, [postsRef]);
+  }, [firestore]);
 
   const { data: threads, isLoading } = useCollection(postsQuery);
 
   const handleStartNewThread = () => {
-    if (!postsRef || !user || !newThreadTitle.trim() || !newThreadContent.trim()) return;
-
+    if (!firestore || !user || !newThreadTitle.trim() || !newThreadContent.trim()) return;
+    const postsRef = collection(firestore, "communityPosts");
     addDocumentNonBlocking(postsRef, {
       title: newThreadTitle,
       content: newThreadContent,

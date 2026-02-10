@@ -12,12 +12,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useUser } from "@/firebase/provider";
+import { useUser, useFirestore, useMemoFirebase } from "@/firebase/provider";
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { useFirestore } from "@/firebase/provider";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, orderBy, query, serverTimestamp } from "firebase/firestore";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -28,20 +27,17 @@ export default function JournalPage() {
   const { toast } = useToast();
   const [newEntry, setNewEntry] = useState("");
 
-  const entriesRef = useMemo(() => {
+  const entriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return collection(firestore, "users", user.uid, "journalEntries");
-  }, [user, firestore]);
-
-  const entriesQuery = useMemo(() => {
-    if (!entriesRef) return null;
+    const entriesRef = collection(firestore, "users", user.uid, "journalEntries");
     return query(entriesRef, orderBy("entryDate", "desc"));
-  }, [entriesRef]);
+  }, [user, firestore]);
 
   const { data: journalEntries, isLoading } = useCollection(entriesQuery);
 
   const handleSaveEntry = () => {
-    if (!entriesRef || !newEntry.trim() || !user) return;
+    if (!firestore || !user || !newEntry.trim()) return;
+    const entriesRef = collection(firestore, "users", user.uid, "journalEntries");
     addDocumentNonBlocking(entriesRef, {
       userId: user.uid,
       content: newEntry,
@@ -73,7 +69,7 @@ export default function JournalPage() {
             />
           </CardContent>
           <CardFooter>
-            <Button onClick={handleSaveEntry}>Save Entry</Button>
+            <Button onClick={handleSaveEntry} disabled={!newEntry.trim() || !user}>Save Entry</Button>
           </CardFooter>
         </Card>
 
@@ -96,7 +92,7 @@ export default function JournalPage() {
               <Card key={entry.id} className="transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                 <CardHeader>
                   <CardTitle className="text-lg">
-                     {entry.entryDate ? format(entry.entryDate.toDate(), 'MMMM dd, yyyy') : "Just now"}
+                     {entry.entryDate ? format((entry.entryDate as any).toDate(), 'MMMM dd, yyyy') : "Just now"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
