@@ -127,7 +127,7 @@ export default function ChatbotPage() {
 
   return (
     <DashboardLayout pageTitle="Wellness Chatbot">
-      <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-gradient-to-br from-gray-950 to-sky-900">
+      <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-gradient-to-br from-black to-sky-800">
         <ScrollArea className="flex-1 p-4 md:p-6" ref={scrollAreaRef}>
           <div className="space-y-6 max-w-3xl mx-auto">
             {!isLoadingMessages && !messages?.length && (
