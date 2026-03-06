@@ -1,48 +1,14 @@
 rules_version = '2';
 
 /**
- * @name Firebase Security Rules: Mental Wellness App
+ * @name Firebase Security Rules: Salus Mental Wellness Platform
  * @author AI Security Architect
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @description
- * This ruleset provides security for a mental wellness application. It enforces a
- * strict data privacy model for user-specific information while allowing for a
- * public, collaborative space for community engagement.
- *
- * @philosophy
- * Core Philosophy: A strict user-ownership model is the foundation of these rules.
- * All personal data, including journals, goals, and chat sessions, is confined
- * within a user-specific data tree, making it accessible only to the owner.
- *
- * Data Structure: All private user data is hierarchically organized under
- * `/users/{userId}`. This path-based ownership is simple, performant, and secure.
- * Publicly shared data, like community posts, resides in a separate top-level
- * collection to enable different access patterns and secure list queries.
- *
- * Key Security Decisions:
- * 1. Default-Deny: Access is denied unless explicitly granted.
- * 2. User Data Privacy: All content under `/users/{userId}` is strictly private
- *    to that user.
- * 3. No User Enumeration: Listing documents in the top-level `/users` collection
- *    is explicitly forbidden to protect user privacy.
- * 4. Public Content Moderation: Anyone can read community posts, but only signed-in
- *    users can create them, and only the original author can modify or delete them.
- * 5. Authorization over Validation: These rules focus on "who can do what" (authorization)
- *    and not on the specific shape of the data (validation), which is ideal for
- *    prototyping and rapid development. Critical relational fields (like `userId`)
- *    are validated to maintain data integrity.
- *
- * Denormalization for Authorization: The `CommunityPost` documents contain a `userId`
- * field, denormalizing the author's ID directly onto the document. This allows
- * for fast and efficient ownership checks on update and delete operations without
- * costly lookups. For private data, the user's ID in the document path
- * (`/users/{userId}/...`) serves the same purpose.
- *
- * Structural Segregation: Private user data (journals, goals) and public data
- * (community posts) are stored in separate collections. This is a crucial design
- * choice that prevents accidental data leakage and makes it possible to write
- * secure and efficient rules for listing documents.
+ * This ruleset enforces a strict private-first model for Salus. 
+ * All user data is restricted to the owner, while educational 
+ * content like stories is public for all users to read.
  */
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -51,49 +17,25 @@ service cloud.firestore {
     // Helper Functions
     // -------------------------------------------------------------------------
 
-    /**
-     * Checks if a user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the currently signed-in user's UID matches the provided userId.
-     * This is the foundation of the ownership model.
-     * @param userId The UID of the resource owner.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * A robust check for state-changing operations (update, delete).
-     * Ensures the user is the owner AND the document already exists.
-     * @param userId The UID of the resource owner.
-     */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
-
 
     // -------------------------------------------------------------------------
     // User Profile Rules (/users)
     // -------------------------------------------------------------------------
 
-    /**
-     * @description Controls access to user profile documents. A user can create
-     *   their own profile, and can only read, update, or delete their own data.
-     *   Listing all users is explicitly denied to prevent user enumeration.
-     * @path /users/{userId}
-     * @allow (create) A new user with UID 'user_abc' creating their own profile at `/users/user_abc`.
-     * @deny (get) User 'user_xyz' trying to read the profile of 'user_abc' at `/users/user_abc`.
-     * @deny (list) Any user trying to get a list of all documents in the `/users` collection.
-     * @principle Enforces self-creation and strict data ownership. Prevents data scraping.
-     */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
+      allow list: if false; // Prevent user enumeration
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
@@ -103,58 +45,36 @@ service cloud.firestore {
       // -----------------------------------------------------------------------
 
       /**
-       * @description Secures a user's private journal entries. Access is
-       *   restricted exclusively to the user specified in the path.
-       * @path /users/{userId}/journalEntries/{journalEntryId}
-       * @allow (get, list, create, update, delete) User 'user_abc' accessing their own documents at `/users/user_abc/journalEntries/...`.
-       * @deny (any) User 'user_xyz' trying to access anything under `/users/user_abc/journalEntries`.
-       * @principle Restricts access to a user's own private data tree via path-based ownership.
+       * Secures journal entries, mood logs, and goals.
        */
-      match /journalEntries/{journalEntryId} {
+      match /journalEntries/{entryId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
-       * @description Secures a user's private wellness goals. Access is
-       *   restricted exclusively to the user specified in the path.
-       * @path /users/{userId}/wellnessGoals/{wellnessGoalId}
-       * @allow (get, list, create, update, delete) User 'user_abc' accessing their own documents at `/users/user_abc/wellnessGoals/...`.
-       * @deny (any) User 'user_xyz' trying to access anything under `/users/user_abc/wellnessGoals`.
-       * @principle Restricts access to a user's own private data tree via path-based ownership.
-       */
-      match /wellnessGoals/{wellnessGoalId} {
+      match /moodLogs/{logId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
-       * @description Secures a user's private chatbot sessions. Access is
-       *   restricted exclusively to the user specified in the path.
-       * @path /users/{userId}/chatbotSessions/{chatbotSessionId}
-       * @allow (get, list, create, update, delete) User 'user_abc' accessing their own documents at `/users/user_abc/chatbotSessions/...`.
-       * @deny (any) User 'user_xyz' trying to access anything under `/users/user_abc/chatbotSessions`.
-       * @principle Restricts access to a user's own private data tree via path-based ownership.
-       */
-      match /chatbotSessions/{chatbotSessionId} {
+      match /wellnessGoals/{goalId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      match /chatbotSessions/{sessionId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
 
-        /**
-         * @description Secures chat messages within a session. Ownership is
-         *   inherited from the `/users/{userId}` path.
-         * @path /users/{userId}/chatbotSessions/{chatbotSessionId}/chatMessages/{chatMessageId}
-         * @allow (get, list, create, update, delete) User 'user_abc' accessing messages in their own session.
-         * @deny (any) User 'user_xyz' trying to access messages in 'user_abc's session.
-         * @principle Inherited path-based ownership for nested private data.
-         */
-        match /chatMessages/{chatMessageId} {
+        match /chatMessages/{messageId} {
           allow get, list: if isOwner(userId);
           allow create: if isOwner(userId);
           allow update: if isExistingOwner(userId);
@@ -163,28 +83,15 @@ service cloud.firestore {
       }
     }
 
-
     // -------------------------------------------------------------------------
-    // Community Post Rules (/communityPosts)
+    // Public Content Rules
     // -------------------------------------------------------------------------
 
     /**
-     * @description Controls access to public community posts. All users (including
-     *   unauthenticated ones) can read posts. Only authenticated users can create
-     *   posts, and only the original author can update or delete their own posts.
-     * @path /communityPosts/{communityPostId}
-     * @allow (get, list) Any user, signed in or not, can read community posts.
-     * @allow (create) A signed-in user 'user_abc' creating a new post with `{ userId: 'user_abc' }`.
-     * @allow (update) The author 'user_abc' updating their own post.
-     * @deny (create) An anonymous user trying to create a post.
-     * @deny (update, delete) User 'user_xyz' trying to modify or delete a post created by 'user_abc'.
-     * @principle Implements a "Public Read with Owner-Only Writes" model.
+     * Resilience stories are read-only for all users.
      */
-    match /communityPosts/{communityPostId} {
+    match /stories/{storyId} {
       allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(resource.data.userId);
     }
   }
 }
