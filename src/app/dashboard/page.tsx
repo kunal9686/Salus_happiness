@@ -15,7 +15,7 @@ import { Smile, Meh, Frown, Laugh, Flame, BookOpen, Target, Calendar } from "luc
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 
 const moods = [
-  { id: 'very-low', label: '😞 Very Low', color: 'text-red-400', val: 1 },
+  { id: 'bad', label: '😞 Bad', color: 'text-red-400', val: 1 },
   { id: 'neutral', label: '😐 Neutral', color: 'text-yellow-400', val: 2 },
   { id: 'good', label: '🙂 Good', color: 'text-green-400', val: 3 },
   { id: 'great', label: '😄 Great', color: 'text-primary', val: 4 },

@@ -5,11 +5,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, PenLine, TrendingUp } from "lucide-react";
 
+/**
+ * @fileOverview Splash landing page for Salus.
+ * Features an entry animation and automatically redirects to the dashboard.
+ */
 export default function Home() {
   const [isExiting, setIsExiting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    // Show the "Salus" title for 3 seconds before starting the exit transition
     const timer = setTimeout(() => {
       setIsExiting(true);
     }, 3000);
@@ -17,11 +22,15 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAnimationEnd = () => {
+  useEffect(() => {
+    // Once exiting starts, wait for the transition (1s) then redirect to the dashboard
     if (isExiting) {
-      router.push("/login");
+      const redirectTimer = setTimeout(() => {
+        router.push("/dashboard");
+      }, 1100); // 1.1s to ensure transition finishes
+      return () => clearTimeout(redirectTimer);
     }
-  };
+  }, [isExiting, router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-black overflow-hidden relative">
@@ -31,8 +40,7 @@ export default function Home() {
       </div>
 
       <main
-        onAnimationEnd={handleAnimationEnd}
-        className={`flex flex-col items-center justify-center text-center z-10 transition-all duration-1000 ${
+        className={`flex flex-col items-center justify-center text-center z-10 transition-all duration-1000 ease-in-out ${
           isExiting ? "scale-95 opacity-0 blur-lg" : "scale-100 opacity-100 blur-0"
         }`}
       >
